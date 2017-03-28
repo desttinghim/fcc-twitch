@@ -9,12 +9,13 @@ class Twitch implements Mithril {
     var data : Dynamic;
     public function new() {
         loaded = false;
-        // data = Json.parse(haxe.Resource.getString("twitch"));
+        data = getData();
+        M.redraw();
     }
     public function view() [
-        m('.error', 'nothing found'),
+        m('.error', data),
     ];
     function getData() {
-        return ;
+        return haxe.Json.parse(haxe.Resource.getString("twitch"));
     }
 }
