@@ -1,0 +1,10 @@
+
+-cmd cp assets/* export/
+
+-resource assets/twitch.json@twitch
+
+-lib mithril:1.0.0
+
+-main Main
+-cp src
+-js export/main.js
