@@ -18,7 +18,8 @@ class Twitch implements Mithril {
         M.redraw();
     }
     public function view() [
-        for (datum in data) m(new StreamerView(datum))
+        m('h1', 'Twitch Streamers'),
+        m('.streamers', [for (datum in data) m(new StreamerView(datum))]),
     ];
     function getData() {
         return haxe.Json.parse(haxe.Resource.getString("twitch"));
@@ -28,16 +29,24 @@ class Twitch implements Mithril {
 class StreamerView implements Mithril {
     var data : Dynamic;
     var stream : Dynamic;
+    var _links : Dynamic;
+
     var name : String;
+    var url : String;
+    var status : String;
     public function new(data) {
         this.data = data;
         this.stream = Reflect.getProperty(data, "stream");
         this.name = Reflect.getProperty(data, "display_name");
+        this._links = Reflect.getProperty(data, "_links");
+
+        this.url = Reflect.getProperty(stream, "url");
+        this.status = Reflect.getProperty(stream, "status");
         if (stream != null && name == null) name = Reflect.getProperty(stream, "display_name");
     }
     public function view() m('.streamerview', [
-        m('h2', name),
-        m('p.online', stream == null ? 'Offline' : 'Online'),
+        m('a', {href: url}, m('h3', name)),
+        m('p.status', status == null ? Offline : status),
         //for (field in data.fields()) m('p', field + " " + Reflect.getProperty(data, field)),
     ]);
 }
