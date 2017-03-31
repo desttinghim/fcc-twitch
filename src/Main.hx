@@ -56,14 +56,10 @@ class Main {
 
 class Twitch implements Mithril {
     var loaded : Bool;
-    var stream : Map<String, Dynamic>;
-    var user : Map<String, Dynamic>;
     var streamers : Map<String, StreamerView>;
     public function new() {
         loaded = false;
-        stream = ["" => ""];
-        user = ["" => ""];
-        streamers = ["" => null];
+        streamers = new Map<String, StreamerView>();
         M.redraw();
     }
     public function view() [
@@ -73,18 +69,18 @@ class Twitch implements Mithril {
     ];
     public function setStream(name, data) {
         if (data == null) return;
-        loaded = true;
-        stream.set(name, data);
-        if(streamers.get(name) != null) this.streamers.set(name, new StreamerView(name));
+
+        if(!streamers.exists(name)) streamers.set(name, new StreamerView(name));
         streamers.get(name).setStream(data);
+        if(streamers.exists(name)) loaded = true;
         M.redraw();
     }
     public function setUser(name, data) {
         if (data == null) return;
-        loaded = true;
-        user.set(name, data);
-        if(streamers.get(name) != null) this.streamers.set(name, new StreamerView(name));
+
+        if(!streamers.exists(name)) streamers.set(name, new StreamerView(name));
         streamers.get(name).setUser(data);
+        if(streamers.exists(name)) loaded = true;
         M.redraw();
     }
 }
@@ -106,7 +102,7 @@ class StreamerView implements Mithril {
     }
     public function view() m('.streamerview',
     error == null ? [
-        m('img.logosmall', {src: imgUrl, width: 50, height: 50}),
+        m('img.logosmall', {src: imgUrl}),
         m('a.username', {href: url}, m('h3', name)),
         m('p.status', _stream == null ? "Offline" : status),
     ] : [
