@@ -2,8 +2,28 @@ import mithril.M;
 
 using Reflect;
 
+@:expose
 class Main {
-    static function main() {M.mount(js.Browser.document.body, new Twitch());}
+    static var twitch:Twitch;
+    static function main() {
+        twitch = new Twitch();
+        M.mount(js.Browser.document.body, twitch);
+        getData();
+    }
+    static function getData() {
+        haxe.Json.parse(haxe.Resource.getString("twitch"));
+        Web.ajax({
+            url: 'https://wind-bow.gomix.me/twitch-api/streams/freecodecamp',
+            options: [
+                'callback' => 'Main.dataCallback',
+            ]
+        });
+        trace('Getting data...');
+    }
+    public static function dataCallback(data:Dynamic) {
+        trace(data);
+        twitch.setData(data);
+    }
 }
 
 class Twitch implements Mithril {
@@ -11,7 +31,7 @@ class Twitch implements Mithril {
     var data : Array<Dynamic>;
     public function new() {
         loaded = false;
-        data = getData();
+        data = [];
         for (i in data) {
             trace(i.fields());
         }
@@ -19,10 +39,13 @@ class Twitch implements Mithril {
     }
     public function view() [
         m('h1', 'Twitch Streamers'),
-        m('.streamers', [for (datum in data) m(new StreamerView(datum))]),
+        loaded ? m('.streamers', [for (datum in data) m(new StreamerView(datum))])
+        : m('.loading', 'Loading...'),
     ];
-    function getData() {
-        return haxe.Json.parse(haxe.Resource.getString("twitch"));
+    public function setData(data) {
+        if (data == null) return;
+        loaded = true;
+        this.data = data;
     }
 }
 

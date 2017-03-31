@@ -15,8 +15,8 @@ class Web {
         script.src = request.url + "?";
         var first = true;
         for(key in request.options.keys()) {
-            if (!first) script.src += "&";
-            else first = false;
+            if (first) first = false;
+            else script.src += "&";
             script.src += '${key}=${request.options[key]}';
         }
         Browser.document.head.appendChild(script);
