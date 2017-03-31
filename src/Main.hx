@@ -75,50 +75,8 @@ class StreamerView implements Mithril {
     public function view() m('.streamerview',
     error == null ? [
         m('a', {href: url}, m('h3', name)),
-        m('p.status', status == null ? "Offline" : status),
+        m('p.status', stream == null ? "Offline" : status),
     ] : [
         m('h3', 'Error: $error'),
-        //for (field in data.fields()) m('p', field + " " + Reflect.getProperty(data, field)),
     ]);
 }
-//
-// typedef TwitchRespone = Array<{
-//     @:optional var stream : StreamInfo;
-//     @:optional var _links : Links;
-// }>;
-//
-// typedef StreamInfo = {
-//     @:optional var mature : Bool;
-//     @:optional var status : String;
-//     @:optional var broadcaster_language : String;
-//     @:optional var display_name : String;
-//     @:optional var game : String;
-//     @:optional var _id : Int;
-//     @:optional var name : String;
-//     @:optional var created_at : String;
-//     @:optional var updated_at : String;
-//     @:optional var delay : String;
-//     @:optional var logo : String;
-//     @:optional var banner : String;
-//     @:optional var video_banner : String;
-//     @:optional var background : String;
-//     @:optional var profile_banner : String;
-//     @:optional var profile_banner_background_color : String;
-//     @:optional var partner : Bool;
-//     @:optional var url : String;
-//     @:optional var views : Int;
-//     @:optional var followers : Int;
-//     @:optional var _links : Links;
-// };
-//
-// typedef Links = {
-//     self : String,
-//     follows : String,
-//     commercial : String,
-//     stream_key : String,
-//     chat : String,
-//     subscriptions : String,
-//     editors : String,
-//     teams : String,
-//     videos : String,
-// };
