@@ -31,11 +31,17 @@ class StreamerView implements Mithril {
     var stream : Dynamic;
     var _links : Dynamic;
 
+    var error : String;
     var name : String;
     var url : String;
     var status : String;
     public function new(data) {
         this.data = data;
+        if (Reflect.hasField(data, "error")) {
+            error = Reflect.getProperty(data, "error");
+            return;
+        }
+        error = null;
         this.stream = Reflect.getProperty(data, "stream");
         this.name = Reflect.getProperty(data, "display_name");
         this._links = Reflect.getProperty(data, "_links");
@@ -44,9 +50,12 @@ class StreamerView implements Mithril {
         this.status = Reflect.getProperty(stream, "status");
         if (stream != null && name == null) name = Reflect.getProperty(stream, "display_name");
     }
-    public function view() m('.streamerview', [
+    public function view() m('.streamerview',
+    error == null ? [
         m('a', {href: url}, m('h3', name)),
-        m('p.status', status == null ? Offline : status),
+        m('p.status', status == null ? "Offline" : status),
+    ] : [
+        m('h3', 'Error: $error'),
         //for (field in data.fields()) m('p', field + " " + Reflect.getProperty(data, field)),
     ]);
 }
