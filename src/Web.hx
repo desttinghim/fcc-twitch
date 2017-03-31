@@ -20,6 +20,5 @@ class Web {
             script.src += '${key}=${request.options[key]}';
         }
         Browser.document.head.appendChild(script);
-        trace(script.src);
     }
 }
