@@ -2,14 +2,18 @@ import mithril.M;
 import js.Browser;
 
 using Reflect;
-
+/* TODO:
+ * Deduplicate data - find just one place to store it
+ * Redesign components so they aren't calling each othres public functions
+ willy nilly
+ */
 @:expose
 class Main {
     static var twitch:Twitch;
+    static var streamers = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp", "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas"];
     static function main() {
-        twitch = new Twitch();
+        twitch = new Twitch(streamers, getData);
         M.mount(js.Browser.document.body, twitch);
-        getData();
     }
     static function getData() {
         haxe.Json.parse(haxe.Resource.getString("twitch"));
@@ -36,96 +40,70 @@ class Main {
                 options: ['callback' => 'Main.userCallback[$index]']});
         }
     }
-    public static var streamers = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp", "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas"];
 
     public static var streamCallback = [
         for (i in streamers) function(data:Dynamic) {
             trace('Got stream data for ${i}');
-            js.Cookie.set('stream_$i', data.toString(), 60);
+            js.Cookie.set('stream_$i', data.toString());
             twitch.setStream(i,data);
         }
     ];
     public static var userCallback = [
         for (i in streamers) function(data:Dynamic) {
             trace('Got stream data for ${i}');
-            js.Cookie.set('user_$i', data.toString(), 60);
+            js.Cookie.set('user_$i', data.toString());
             twitch.setUser(i,data);
         }
     ];
 }
 
+typedef StreamerData = {
+    var name : String;
+    var url : String;
+    var status : String;
+    var img : String;
+};
+
 class Twitch implements Mithril {
-    var loaded : Bool;
     var streamers : Map<String, StreamerView>;
-    public function new() {
-        loaded = false;
-        streamers = new Map<String, StreamerView>();
+    public function new(streamers:Array<String>, getData) {
+        this.streamers = new Map<String, StreamerView>();
+        for(streamer in streamers) {
+            this.streamers.set(streamer, new StreamerView({
+                name: streamer,
+                url: "#",
+                status: 'Offline',
+                img: "#",
+            }));
+        }
         M.redraw();
+        getData();
     }
     public function view() [
         m('h1', 'Twitch Streamers'),
-        loaded ? m('.streamers', [for (streamer in streamers.keys()) m(streamers.get(streamer))])
-        : m('.loading', 'Loading...'),
+            m('.streamers', [for (streamer in streamers.keys()) m(streamers.get(streamer))]),
     ];
-    public function setStream(name, data) {
-        if (data == null) return;
-
-        if(!streamers.exists(name)) streamers.set(name, new StreamerView(name));
-        streamers.get(name).setStream(data);
-        if(streamers.exists(name)) loaded = true;
-        M.redraw();
-    }
-    public function setUser(name, data) {
-        if (data == null) return;
-
-        if(!streamers.exists(name)) streamers.set(name, new StreamerView(name));
-        streamers.get(name).setUser(data);
-        if(streamers.exists(name)) loaded = true;
-        M.redraw();
-    }
 }
 
+typedef Stream = {
+    @:optional var stream : Dynamic;
+    @:optional var display_name : Dynamic;
+    @:optional var _links : Dynamic;
+};
+
+typedef User = {
+    @:optional var imgUrl : Dynamic;
+};
+
 class StreamerView implements Mithril {
-    var user : Dynamic;
-    var stream : Dynamic;
-    var _stream : Dynamic;
-    var _links : Dynamic;
+    public var data : StreamerData;
 
-    var error : String;
-    var name : String;
-    var url : String;
-    var imgUrl : String;
-    var status : String;
-
-    public function new(name) {
-        this.name = name;
+    public function new(data:StreamerData) {
+        this.data = data;
     }
-    public function view() m('.streamerview',
-    error == null ? [
-        m('img.logosmall', {src: imgUrl}),
-        m('a.username', {href: url}, m('h3', name)),
-        m('p.status', _stream == null ? "Offline" : status),
-    ] : [
-        m('h3', 'Error: $error'),
+    public function view() m('.streamerview', [
+        m('img.logosmall', {src: data.img}),
+        m('a.username', {href: data.url}, m('h3', data.name)),
+        m('p.status', data.status),
     ]);
-
-    public function setUser(data) {
-        user = data;
-        this.imgUrl = Reflect.getProperty(this.user, "logo");
-    }
-
-    public function setStream(data) {
-        stream = data;
-        if (Reflect.hasField(stream, "error")) {
-            error = stream.getProperty("error");
-            return;
-        }
-        error = null;
-        this._stream = stream.getProperty("stream");
-        this._links = stream.getProperty("_links");
-        this.url = _stream.getProperty("channel");
-        this.status = _stream.getProperty("status");
-
-        trace(_stream.fields());
-    }
 }
