@@ -1,22 +1,41 @@
 import mithril.M;
 import js.Browser;
+import promhx.Promise;
+import promhx.Deferred;
 
-using Reflect;
-/* TODO:
- * Deduplicate data - find just one place to store it
- * Redesign components so they aren't calling each othres public functions
- willy nilly
- */
 @:expose
 class Main {
     static var twitch:Twitch;
     static var streamers = ["ESL_SC2", "OgamingSC2", "cretetion", "freecodecamp", "storbeck", "habathcx", "RobotCaleb", "noobs2ninjas"];
+    public static var users : Map<String, Deferred<User>>;
+    public static var streams : Map<String, Deferred<Stream>>;
     static function main() {
-        twitch = new Twitch(streamers, getData);
+        twitch = new Twitch(streamers);
         M.mount(js.Browser.document.body, twitch);
+
+        for (streamer in streamers) {
+            var a = new StreamerView({
+                name: streamer,
+                url: "#",
+                status: 'Offline',
+                img: "#",
+            });
+            var d1 = new Deferred<User>(); users.set(streamer, d1);
+            var d2 = new Deferred<Stream>(); streams.set(streamer, d2);
+            var pUser = new Promise<User>(d1);
+            var pStream = new Promise<Stream>(d2);
+            Promise.when(pUser, pStream).then(function(user,stream) {
+                twitch.streamers.set(streamer, new StreamerView({
+                    name: streamer,
+                    url: cast stream._links.get('self'),
+                    status: cast stream._stream.get('status'),
+                    img: cast user.get('icon'),
+                }));
+            });
+        }
     }
     static function getData() {
-        haxe.Json.parse(haxe.Resource.getString("twitch"));
+        // haxe.Json.parse(haxe.Resource.getString("twitch"));
         for (i in 0...streamers.length) {
             trace('Getting data for ${streamers[i]}...');
             getStreamerData(i);
@@ -43,16 +62,12 @@ class Main {
 
     public static var streamCallback = [
         for (i in streamers) function(data:Dynamic) {
-            trace('Got stream data for ${i}');
-            js.Cookie.set('stream_$i', data.toString());
-            twitch.setStream(i,data);
+            streams[i].resolve(data);
         }
     ];
     public static var userCallback = [
         for (i in streamers) function(data:Dynamic) {
-            trace('Got stream data for ${i}');
-            js.Cookie.set('user_$i', data.toString());
-            twitch.setUser(i,data);
+            users[i].resolve(data);
         }
     ];
 }
@@ -65,8 +80,8 @@ typedef StreamerData = {
 };
 
 class Twitch implements Mithril {
-    var streamers : Map<String, StreamerView>;
-    public function new(streamers:Array<String>, getData) {
+    public var streamers : Map<String, StreamerView>;
+    public function new(streamers:Array<String>) {
         this.streamers = new Map<String, StreamerView>();
         for(streamer in streamers) {
             this.streamers.set(streamer, new StreamerView({
@@ -76,8 +91,6 @@ class Twitch implements Mithril {
                 img: "#",
             }));
         }
-        M.redraw();
-        getData();
     }
     public function view() [
         m('h1', 'Twitch Streamers'),
