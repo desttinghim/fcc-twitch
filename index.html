@@ -14,27 +14,40 @@
         #app {
             width: 640px;
             margin: 0px auto;
+            margin-top: 0px;
+            padding-top: 0px;
+            color: #ffffff;
+        }
+
+        .header {
+            background-color: #D8D8D8;
         }
 
         .center {
             text-align: center;
+            margin: 0px auto;
+            margin-bottom: 15px;
         }
 
         .streamer {
             /*background-color: #afafaf;*/
             margin-bottom: 10px;
+            overflow: hidden;
+            border-top-left-radius: 25px;
+            border-bottom-left-radius: 25px;
+            display: block;
         }
 
         .offline {
-            background-color: #afafaf;/*#0011cc;*/
+            background-color: #D8D8D8;/*#0011cc;*/
         }
 
         .online {
-            background-color: #00bb33;
+            background-color: #8181F7;
         }
 
         .nonexistant {
-            background-color: #ff9999;
+            background-color: #F5A9BC;
         }
 
         .icon {
@@ -42,12 +55,13 @@
             width: 50px;
             height: 50px;
             border-radius: 25px;
+            margin-left: 10px;
         }
 
         .username {
             display: inline-block;
             overflow: hidden;
-            width: 300px;
+            width: 30%;
         }
 
         .message {
@@ -63,13 +77,15 @@
     <body>
 
         <div id="app">
-            <h1 class="center">Active Twitch Streamers</h1>
+            <div class="header">
+                <h1 class="center">Active Twitch Streamers</h1>
+            </div>
             <div class="streamers">
                 <div class="streamer" v-for="streamer in streamers">
                     <div v-bind:class="[streamer.status]">
-                        <img class="icon" v-bind:src="streamer.img" />
-                        <a v-bind:href="streamer.url"><h3 class="username">{{streamer.name}}</h3></a>
-                        <p class="message">{{streamer.message}}</p>
+                        <a v-bind:href="streamer.url"><img class="icon" v-bind:src="streamer.img" /></a>
+                        <h3 class="username">{{streamer.name}}
+                        </h3><p class="message">{{streamer.message}}</p>
                     </div>
                 </div>
             </div>
