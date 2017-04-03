@@ -1,7 +1,5 @@
-var status = {
-    offline: 'offline',
-    online: 'online',
-}
+"use strict";
+
 
 var app = new Vue({
     el: '#app',
@@ -14,6 +12,7 @@ function setUserDataProto(index) {
     return function(data) {
         if (data.error !== undefined) {
             app.streamers[index].message = data.message;
+            app.streamers[index].status = 'nonexistant';
             return;
         }
         if (data.logo !== undefined) {
@@ -25,21 +24,25 @@ function setUserDataProto(index) {
 function setStreamDataProto(index) {
     return function(data) {
         if (data.stream === null) {
-            app.streamers[index].status = status.offline;
+            if (app.streamers[index].status !== 'nonexistant')
+                app.streamers[index].status = 'offline';
         } else {
-            app.streamers[index].status = status.online;
-            app.streamers[index].message = data.stream.game;
+            app.streamers[index].status = 'online';
+            app.streamers[index].message = data.stream.channel.game;
+            app.streamers[index].url = data.stream.channel.url;
         }
     }
 }
 
 function pushDefault(name) {
-    app.streamers.push({
+    var temp = {
         name: name,
         img: 'http://www.placehold.it/50x50',
         message: 'Offline',
-        status: status.offline,
-    });
+        status: 'offline',
+        url: 'http://www.twitch.tv/' + name,
+    };
+    app.streamers.push(temp);
 }
 
 function ajax(request) {

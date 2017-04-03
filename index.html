@@ -11,9 +11,18 @@
 
         <style>
 
+        #app {
+            width: 640px;
+            margin: 0px auto;
+        }
+
+        .center {
+            text-align: center;
+        }
+
         .streamer {
-            background-color: #afafaf;
-            padding-bottom: 10px;
+            /*background-color: #afafaf;*/
+            margin-bottom: 10px;
         }
 
         .offline {
@@ -22,6 +31,10 @@
 
         .online {
             background-color: #00bb33;
+        }
+
+        .nonexistant {
+            background-color: #ff9999;
         }
 
         .icon {
@@ -50,13 +63,13 @@
     <body>
 
         <div id="app">
-            <h1>Active Twitch Streamers</h1>
+            <h1 class="center">Active Twitch Streamers</h1>
             <div class="streamers">
                 <div class="streamer" v-for="streamer in streamers">
-                    <div v-bind:class="streamer.status">
+                    <div v-bind:class="[streamer.status]">
                         <img class="icon" v-bind:src="streamer.img" />
-                        <h3 class="username">{{streamer.name}}</h3>
-                        <p class="message">{{streamer.message}}</h3>
+                        <a v-bind:href="streamer.url"><h3 class="username">{{streamer.name}}</h3></a>
+                        <p class="message">{{streamer.message}}</p>
                     </div>
                 </div>
             </div>
