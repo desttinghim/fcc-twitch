@@ -29,13 +29,19 @@
             margin-bottom: 15px;
         }
 
-        .streamer {
+        .streamer > div {
             /*background-color: #afafaf;*/
             margin-bottom: 10px;
+            padding-top: 7px;
             overflow: hidden;
             border-top-left-radius: 25px;
             border-bottom-left-radius: 25px;
-            display: block;
+            width: 100%;
+        }
+
+        .streamer > div * {
+            display: inline-block;
+            float: left;
         }
 
         .offline {
@@ -62,6 +68,7 @@
             display: inline-block;
             overflow: hidden;
             width: 30%;
+            margin-left: 10px;
         }
 
         .message {
