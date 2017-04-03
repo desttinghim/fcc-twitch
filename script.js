@@ -37,7 +37,7 @@ function setStreamDataProto(index) {
 function pushDefault(name) {
     var temp = {
         name: name,
-        img: 'http://www.placehold.it/50x50',
+        img: '50x50.png',
         message: 'Offline',
         status: 'offline',
         url: 'http://www.twitch.tv/' + name,
